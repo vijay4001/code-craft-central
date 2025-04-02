@@ -9,12 +9,14 @@ const MenuItem = ({
   icon: Icon, 
   label, 
   active = false,
-  onClick
+  onClick,
+  expanded
 }: { 
   icon: React.ElementType, 
   label: string, 
   active?: boolean,
-  onClick?: () => void
+  onClick?: () => void,
+  expanded?: boolean
 }) => {
   return (
     <div 
@@ -23,11 +25,12 @@ const MenuItem = ({
         "flex items-center gap-2 p-3 rounded-md cursor-pointer transition-colors",
         active 
           ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+          : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+        !expanded && "justify-center"
       )}
     >
       <Icon size={20} />
-      <span className="font-medium">{label}</span>
+      {expanded && <span className="font-medium">{label}</span>}
     </div>
   );
 };
@@ -77,6 +80,7 @@ const Sidebar = ({
             label={item.label} 
             active={activePage === item.id}
             onClick={() => onPageChange(item.id)}
+            expanded={expanded}
           />
         ))}
       </div>

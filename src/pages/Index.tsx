@@ -31,12 +31,14 @@ const Index = () => {
       title: "Success!",
       description: "Project form closed. In a real app, this would save the project.",
       className: "border-green-500 border-2 bg-green-50 dark:bg-green-950/30 shadow-lg shadow-green-500/20",
+      duration: 3000,
     });
   };
 
   const handlePageChange = (page: string) => {
     if (page === 'newProject') {
       handleNewProject();
+      setActivePage('newProject');
     } else if (page === 'settings') {
       // Store current page before navigating to settings
       navigate('/settings', { state: { returnTo: activePage } });
