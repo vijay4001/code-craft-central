@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Home, FolderKanban, PlusSquare, Settings, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from './ThemeToggle';
+import { getUserData } from '@/pages/SettingsPage';
 
 const MenuItem = ({ 
   icon: Icon, 
@@ -39,6 +40,7 @@ const Sidebar = ({
   onPageChange: (page: string) => void 
 }) => {
   const [expanded, setExpanded] = useState(true);
+  const userData = getUserData();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -88,17 +90,17 @@ const Sidebar = ({
         {expanded ? (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-codeblue flex items-center justify-center text-white font-bold">
-              U
+              {userData.username.charAt(0)}
             </div>
             <div>
-              <p className="text-sm font-medium">User Name</p>
-              <p className="text-xs text-muted-foreground">user@example.com</p>
+              <p className="text-sm font-medium">{userData.username}</p>
+              <p className="text-xs text-muted-foreground">{userData.email}</p>
             </div>
           </div>
         ) : (
           <div className="flex justify-center">
             <div className="w-8 h-8 rounded-full bg-codeblue flex items-center justify-center text-white font-bold">
-              U
+              {userData.username.charAt(0)}
             </div>
           </div>
         )}

@@ -1,16 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
 import ProjectForm from '@/components/ProjectForm';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Index = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // When returning from settings, ensure proper page display
+  useEffect(() => {
+    // Reset to dashboard if coming from another route
+    if (location.state?.returnTo) {
+      setActivePage(location.state.returnTo);
+    }
+  }, [location]);
 
   const handleNewProject = () => {
     setShowNewProjectForm(true);
@@ -21,6 +30,7 @@ const Index = () => {
     toast({
       title: "Success!",
       description: "Project form closed. In a real app, this would save the project.",
+      className: "border-green-500 border-2 bg-green-50 dark:bg-green-950/30 shadow-lg shadow-green-500/20",
     });
   };
 
@@ -28,9 +38,11 @@ const Index = () => {
     if (page === 'newProject') {
       handleNewProject();
     } else if (page === 'settings') {
-      navigate('/settings');
+      // Store current page before navigating to settings
+      navigate('/settings', { state: { returnTo: activePage } });
     } else {
       setActivePage(page);
+      setShowNewProjectForm(false); // Close form if open
     }
   };
 
