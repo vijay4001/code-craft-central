@@ -4,11 +4,13 @@ import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
 import ProjectForm from '@/components/ProjectForm';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleNewProject = () => {
     setShowNewProjectForm(true);
@@ -25,6 +27,8 @@ const Index = () => {
   const handlePageChange = (page: string) => {
     if (page === 'newProject') {
       handleNewProject();
+    } else if (page === 'settings') {
+      navigate('/settings');
     } else {
       setActivePage(page);
     }
@@ -51,26 +55,6 @@ const renderContent = (page: string, onNewProject: () => void) => {
       return <Dashboard onNewProject={onNewProject} />;
     case 'projects':
       return <Dashboard onNewProject={onNewProject} />;
-    case 'search':
-      return (
-        <div className="p-6">
-          <h1 className="text-3xl font-bold">Search Projects</h1>
-          <p className="text-muted-foreground">
-            This is a placeholder for the search page. In a full implementation, 
-            you would have a more advanced search here.
-          </p>
-        </div>
-      );
-    case 'settings':
-      return (
-        <div className="p-6">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
-            This is a placeholder for the settings page. In a full implementation, 
-            you would have user settings and preferences here.
-          </p>
-        </div>
-      );
     default:
       return <Dashboard onNewProject={onNewProject} />;
   }

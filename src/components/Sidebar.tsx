@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Home, FolderKanban, PlusSquare, Search, Settings, Menu, X } from 'lucide-react';
+import { Home, FolderKanban, PlusSquare, Settings, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from './ThemeToggle';
 
@@ -44,7 +44,6 @@ const Sidebar = ({
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'projects', label: 'Projects', icon: FolderKanban },
     { id: 'newProject', label: 'New Project', icon: PlusSquare },
-    { id: 'search', label: 'Search', icon: Search },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
