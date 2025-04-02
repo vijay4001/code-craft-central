@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Smartphone, Desktop } from 'lucide-react';
+import { Smartphone, Monitor } from 'lucide-react';
 
 const MobileBlocker = () => {
   return (
@@ -13,7 +13,7 @@ const MobileBlocker = () => {
             <div className="absolute top-1/2 w-12 h-0.5 bg-destructive rotate-45"></div>
             <div className="absolute top-1/2 w-12 h-0.5 bg-destructive -rotate-45"></div>
           </div>
-          <Desktop size={64} className="text-primary" />
+          <Monitor size={64} className="text-primary" />
         </div>
         <h1 className="text-2xl font-bold">Desktop Only Application</h1>
         <p className="text-muted-foreground">
