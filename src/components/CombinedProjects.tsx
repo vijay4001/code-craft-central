@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Clock, MessageSquare, X, Plus, Trash2 } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -127,6 +128,11 @@ const CombinedProjects = () => {
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectTitle, setNewProjectTitle] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
+  
+  // New state for team members
+  const [teamMembers, setTeamMembers] = useState<string[]>(['']);
+  const [teamRoles, setTeamRoles] = useState<string[]>(['']);
+  
   const { toast } = useToast();
 
   const handleProjectSelect = (project: TeamProject) => {
@@ -296,17 +302,65 @@ const CombinedProjects = () => {
     });
   };
 
+  const addTeamMemberField = () => {
+    setTeamMembers([...teamMembers, '']);
+    setTeamRoles([...teamRoles, '']);
+  };
+
+  const removeTeamMemberField = (index: number) => {
+    const updatedMembers = [...teamMembers];
+    const updatedRoles = [...teamRoles];
+    updatedMembers.splice(index, 1);
+    updatedRoles.splice(index, 1);
+    setTeamMembers(updatedMembers);
+    setTeamRoles(updatedRoles);
+  };
+
+  const handleTeamMemberChange = (index: number, value: string) => {
+    const updatedMembers = [...teamMembers];
+    updatedMembers[index] = value;
+    setTeamMembers(updatedMembers);
+  };
+
+  const handleTeamRoleChange = (index: number, value: string) => {
+    const updatedRoles = [...teamRoles];
+    updatedRoles[index] = value;
+    setTeamRoles(updatedRoles);
+  };
+
   const handleAddProject = () => {
     if (!newProjectTitle || !newProjectDescription) return;
+    
+    // Create team members from inputs
+    const members: TeamMember[] = teamMembers
+      .map((name, index) => {
+        if (!name.trim()) return null;
+        
+        return {
+          id: `member-${Date.now()}-${index}`,
+          name: name,
+          avatar: name.charAt(0).toUpperCase(),
+          role: teamRoles[index] || 'Team Member'
+        };
+      })
+      .filter((member): member is TeamMember => member !== null);
+    
+    // Add at least the creator if no members were specified
+    if (members.length === 0) {
+      members.push({
+        id: `member-${Date.now()}`,
+        name: 'Project Owner',
+        avatar: 'P',
+        role: 'Project Owner'
+      });
+    }
     
     const newProject: TeamProject = {
       id: Date.now().toString(),
       title: newProjectTitle,
       description: newProjectDescription,
       image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=2070&auto=format&fit=crop',
-      members: [
-        { id: '1', name: 'Alex Johnson', avatar: 'A', role: 'Project Lead' },
-      ],
+      members: members,
       tasks: [],
       progress: 0
     };
@@ -314,6 +368,8 @@ const CombinedProjects = () => {
     setProjects([newProject, ...projects]);
     setNewProjectTitle('');
     setNewProjectDescription('');
+    setTeamMembers(['']);
+    setTeamRoles(['']);
     setIsAddingProject(false);
     
     toast({
@@ -337,9 +393,12 @@ const CombinedProjects = () => {
               <Plus size={18} className="mr-1" /> Add Team Project
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Team Project</DialogTitle>
+              <DialogDescription>
+                Add project details and team members
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
@@ -359,6 +418,55 @@ const CombinedProjects = () => {
                   onChange={(e) => setNewProjectDescription(e.target.value)} 
                   placeholder="Enter project description"
                 />
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Team Members</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addTeamMemberField}
+                    className="h-8"
+                  >
+                    <Plus size={16} className="mr-1" /> Add Member
+                  </Button>
+                </div>
+                
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="flex gap-2 items-end">
+                    <div className="space-y-2 flex-1">
+                      <Label htmlFor={`member-name-${index}`}>Name</Label>
+                      <Input
+                        id={`member-name-${index}`}
+                        value={member}
+                        onChange={(e) => handleTeamMemberChange(index, e.target.value)}
+                        placeholder="Team member name"
+                      />
+                    </div>
+                    <div className="space-y-2 flex-1">
+                      <Label htmlFor={`member-role-${index}`}>Role</Label>
+                      <Input
+                        id={`member-role-${index}`}
+                        value={teamRoles[index]}
+                        onChange={(e) => handleTeamRoleChange(index, e.target.value)}
+                        placeholder="e.g. Developer, Designer"
+                      />
+                    </div>
+                    {teamMembers.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeTeamMemberField(index)}
+                        className="h-10 w-10"
+                      >
+                        <X size={16} />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
             <DialogFooter>
