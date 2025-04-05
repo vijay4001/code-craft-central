@@ -24,7 +24,20 @@ const Index = () => {
     if (location.state?.returnTo) {
       setActivePage(location.state.returnTo);
     }
+    
+    // Load saved projects from localStorage
+    const savedProjects = localStorage.getItem('projects');
+    if (savedProjects) {
+      setProjects(JSON.parse(savedProjects));
+    }
   }, [location]);
+  
+  // Save projects to localStorage whenever they change
+  useEffect(() => {
+    if (projects.length > 0) {
+      localStorage.setItem('projects', JSON.stringify(projects));
+    }
+  }, [projects]);
 
   const handleNewProject = () => {
     setShowNewProjectForm(true);
@@ -36,7 +49,8 @@ const Index = () => {
     
     if (newProject) {
       // Add the new project to the list
-      setProjects([newProject, ...projects]);
+      const updatedProjects = [newProject, ...projects];
+      setProjects(updatedProjects);
       
       toast({
         title: "Project Created!",
@@ -65,6 +79,25 @@ const Index = () => {
     setSelectedProject(null);
     setActivePage('dashboard');
   };
+  
+  const handleDeleteProject = (projectId: string) => {
+    // Remove the project from the list
+    const updatedProjects = projects.filter(project => project.id !== projectId);
+    setProjects(updatedProjects);
+    
+    // If the deleted project was selected, clear the selection
+    if (selectedProject?.id === projectId) {
+      setSelectedProject(null);
+      setActivePage('dashboard');
+    }
+    
+    toast({
+      title: "Project Deleted",
+      description: "The project has been removed from your list.",
+      className: "border-red-500 border-2 bg-red-50 dark:bg-red-950/30 shadow-lg shadow-red-500/20",
+      duration: 3000,
+    });
+  };
 
   const handlePageChange = (page: string) => {
     if (page === 'newProject') {
@@ -87,9 +120,13 @@ const Index = () => {
         {showNewProjectForm ? (
           <ProjectForm onClose={handleCloseForm} />
         ) : selectedProject ? (
-          <ProjectDetails project={selectedProject} onBack={handleBackToProjects} />
+          <ProjectDetails 
+            project={selectedProject} 
+            onBack={handleBackToProjects} 
+            onDelete={handleDeleteProject}
+          />
         ) : (
-          renderContent(activePage, handleNewProject, handleProjectClick, projects)
+          renderContent(activePage, handleNewProject, handleProjectClick, projects, handleDeleteProject)
         )}
       </div>
     </div>
@@ -100,17 +137,33 @@ const renderContent = (
   page: string, 
   onNewProject: () => void, 
   onProjectClick: (project: Project) => void,
-  userProjects: Project[]
+  userProjects: Project[],
+  onDeleteProject: (projectId: string) => void
 ) => {
   switch (page) {
     case 'dashboard':
-      return <Dashboard onNewProject={onNewProject} onProjectClick={onProjectClick} userProjects={userProjects} />;
+      return <Dashboard 
+        onNewProject={onNewProject} 
+        onProjectClick={onProjectClick} 
+        userProjects={userProjects} 
+        onDeleteProject={onDeleteProject}
+      />;
     case 'projects':
-      return <Dashboard onNewProject={onNewProject} onProjectClick={onProjectClick} userProjects={userProjects} />;
+      return <Dashboard 
+        onNewProject={onNewProject} 
+        onProjectClick={onProjectClick} 
+        userProjects={userProjects} 
+        onDeleteProject={onDeleteProject}
+      />;
     case 'combined':
       return <CombinedProjects />;
     default:
-      return <Dashboard onNewProject={onNewProject} onProjectClick={onProjectClick} userProjects={userProjects} />;
+      return <Dashboard 
+        onNewProject={onNewProject} 
+        onProjectClick={onProjectClick} 
+        userProjects={userProjects} 
+        onDeleteProject={onDeleteProject}
+      />;
   }
 };
 

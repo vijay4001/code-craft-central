@@ -1,9 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Clock, MessageSquare, X } from 'lucide-react';
+import { Check, Clock, MessageSquare, X, Plus, Trash2 } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeamMember {
   id: string;
@@ -112,10 +116,16 @@ const mockTeamProjects: TeamProject[] = [
 ];
 
 const CombinedProjects = () => {
-  const [projects] = useState<TeamProject[]>(mockTeamProjects);
+  const [projects, setProjects] = useState<TeamProject[]>(mockTeamProjects);
   const [selectedProject, setSelectedProject] = useState<TeamProject | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [newTaskAssignee, setNewTaskAssignee] = useState('');
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const { toast } = useToast();
 
   const handleProjectSelect = (project: TeamProject) => {
     setSelectedProject(project);
@@ -137,13 +147,22 @@ const CombinedProjects = () => {
           }
           return task;
         });
-        return { ...project, tasks: updatedTasks };
+        
+        // Calculate new progress
+        const completedTasks = updatedTasks.filter(t => t.status === 'completed').length;
+        const totalTasks = updatedTasks.length;
+        const newProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        
+        return { 
+          ...project, 
+          tasks: updatedTasks,
+          progress: newProgress
+        };
       }
       return project;
     });
     
-    // In a real app, this would update the state and backend
-    console.log('Updated projects:', updatedProjects);
+    setProjects(updatedProjects);
     
     // Update the selected project
     const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
@@ -151,6 +170,17 @@ const CombinedProjects = () => {
       setSelectedProject(updatedProject);
       setSelectedTask(updatedProject.tasks.find(t => t.id === taskId) || null);
     }
+    
+    toast({
+      title: "Task Updated",
+      description: `Task status has been changed to ${status}`,
+      className: `border-2 bg-opacity-20 shadow-lg ${
+        status === 'completed' ? 'border-green-500 bg-green-50 dark:bg-green-950/30 shadow-green-500/20' :
+        status === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-950/30 shadow-red-500/20' :
+        'border-amber-500 bg-amber-50 dark:bg-amber-950/30 shadow-amber-500/20'
+      }`,
+      duration: 3000,
+    });
   };
   
   const handleAddComment = () => {
@@ -179,8 +209,7 @@ const CombinedProjects = () => {
       return project;
     });
     
-    // In a real app, this would update the state and backend
-    console.log('Updated projects with comment:', updatedProjects);
+    setProjects(updatedProjects);
     
     // Update the selected project and task
     const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
@@ -189,6 +218,86 @@ const CombinedProjects = () => {
       setSelectedTask(updatedProject.tasks.find(t => t.id === selectedTask.id) || null);
       setCommentText('');
     }
+    
+    toast({
+      title: "Comment Added",
+      description: "Your comment has been added to the task",
+      className: "border-codeblue border-2 bg-blue-50 dark:bg-blue-950/30 shadow-lg shadow-blue-500/20",
+      duration: 3000,
+    });
+  };
+  
+  const handleAddTask = () => {
+    if (!selectedProject || !newTaskTitle || !newTaskDescription || !newTaskDueDate || !newTaskAssignee) return;
+    
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: newTaskTitle,
+      description: newTaskDescription,
+      assignedTo: newTaskAssignee,
+      status: 'pending',
+      comments: [],
+      dueDate: newTaskDueDate
+    };
+    
+    const updatedProjects = projects.map(project => {
+      if (project.id === selectedProject.id) {
+        const updatedTasks = [...project.tasks, newTask];
+        
+        // Recalculate progress
+        const completedTasks = updatedTasks.filter(t => t.status === 'completed').length;
+        const totalTasks = updatedTasks.length;
+        const newProgress = Math.round((completedTasks / totalTasks) * 100);
+        
+        return { 
+          ...project, 
+          tasks: updatedTasks,
+          progress: newProgress
+        };
+      }
+      return project;
+    });
+    
+    setProjects(updatedProjects);
+    
+    // Update the selected project
+    const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
+    if (updatedProject) {
+      setSelectedProject(updatedProject);
+    }
+    
+    // Reset form
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setNewTaskDueDate('');
+    setNewTaskAssignee('');
+    setIsAddingTask(false);
+    
+    toast({
+      title: "Task Added",
+      description: "New task has been added to the project",
+      className: "border-green-500 border-2 bg-green-50 dark:bg-green-950/30 shadow-lg shadow-green-500/20",
+      duration: 3000,
+    });
+  };
+  
+  const handleDeleteProject = (projectId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent project selection
+    
+    const updatedProjects = projects.filter(project => project.id !== projectId);
+    setProjects(updatedProjects);
+    
+    if (selectedProject?.id === projectId) {
+      setSelectedProject(null);
+      setSelectedTask(null);
+    }
+    
+    toast({
+      title: "Project Deleted",
+      description: "The project has been removed from your list",
+      className: "border-red-500 border-2 bg-red-50 dark:bg-red-950/30 shadow-lg shadow-red-500/20",
+      duration: 3000,
+    });
   };
 
   return (
@@ -209,12 +318,22 @@ const CombinedProjects = () => {
               onClick={() => handleProjectSelect(project)}
             >
               <CardHeader className="pb-2">
-                <div className="relative h-32 -mx-6 -mt-6 mb-2 overflow-hidden rounded-t-lg">
-                  <img 
-                    src={project.image} 
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="flex justify-between items-start">
+                  <div className="relative h-32 -mx-6 -mt-6 mb-2 overflow-hidden rounded-t-lg">
+                    <img 
+                      src={project.image} 
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <Button 
+                    variant="destructive" 
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-80 hover:opacity-100"
+                    onClick={(e) => handleDeleteProject(project.id, e)}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
                 </div>
                 <CardTitle>{project.title}</CardTitle>
                 <CardDescription>{project.description}</CardDescription>
@@ -257,9 +376,77 @@ const CombinedProjects = () => {
               <TabsContent value="tasks" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <h3 className="font-medium mb-3 flex items-center">
-                      <Clock size={16} className="mr-1" /> Pending
-                    </h3>
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-medium flex items-center">
+                        <Clock size={16} className="mr-1" /> Pending
+                      </h3>
+                      <Dialog open={isAddingTask} onOpenChange={setIsAddingTask}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="h-8">
+                            <Plus size={16} className="mr-1" /> Add Task
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Add New Task</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="task-title">Task Title</Label>
+                              <Input 
+                                id="task-title" 
+                                value={newTaskTitle} 
+                                onChange={(e) => setNewTaskTitle(e.target.value)} 
+                                placeholder="Enter task title"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="task-description">Description</Label>
+                              <Textarea 
+                                id="task-description" 
+                                value={newTaskDescription} 
+                                onChange={(e) => setNewTaskDescription(e.target.value)} 
+                                placeholder="Enter task description"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="task-due-date">Due Date</Label>
+                              <Input 
+                                id="task-due-date" 
+                                type="date" 
+                                value={newTaskDueDate} 
+                                onChange={(e) => setNewTaskDueDate(e.target.value)} 
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="task-assignee">Assign To</Label>
+                              <select 
+                                id="task-assignee"
+                                className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                                value={newTaskAssignee}
+                                onChange={(e) => setNewTaskAssignee(e.target.value)}
+                              >
+                                <option value="">Select Team Member</option>
+                                {selectedProject.members.map(member => (
+                                  <option key={member.id} value={member.id}>
+                                    {member.name} ({member.role})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsAddingTask(false)}>Cancel</Button>
+                            <Button 
+                              onClick={handleAddTask}
+                              disabled={!newTaskTitle || !newTaskDescription || !newTaskDueDate || !newTaskAssignee}
+                            >
+                              Add Task
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                     {selectedProject.tasks
                       .filter(task => task.status === 'pending')
                       .map(task => (

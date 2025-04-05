@@ -51,8 +51,14 @@ const Sidebar = ({
       setUserData(getUserData());
     };
     
-    // Check for user data changes every time the sidebar component renders
+    // Check for user data changes every time the component renders
     updateUserData();
+    
+    // Also update when user returns to the page
+    window.addEventListener('focus', updateUserData);
+    return () => {
+      window.removeEventListener('focus', updateUserData);
+    };
   }, []);
 
   const menuItems = [
@@ -105,7 +111,7 @@ const Sidebar = ({
         {expanded ? (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-codeblue flex items-center justify-center text-white font-bold">
-              {userData.username.charAt(0)}
+              {userData.username.charAt(0).toUpperCase()}
             </div>
             <div>
               <p className="text-sm font-medium">{userData.username}</p>
@@ -115,7 +121,7 @@ const Sidebar = ({
         ) : (
           <div className="flex justify-center">
             <div className="w-8 h-8 rounded-full bg-codeblue flex items-center justify-center text-white font-bold">
-              {userData.username.charAt(0)}
+              {userData.username.charAt(0).toUpperCase()}
             </div>
           </div>
         )}
