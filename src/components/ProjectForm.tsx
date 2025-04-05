@@ -1,8 +1,12 @@
-
 import React, { useState } from 'react';
 import { Upload, X, Save } from 'lucide-react';
+import { Project } from './ProjectCard';
 
-const ProjectForm = ({ onClose }: { onClose: () => void }) => {
+interface ProjectFormProps {
+  onClose: (newProject?: Project) => void;
+}
+
+const ProjectForm = ({ onClose }: ProjectFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -98,19 +102,25 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
   
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this data to your backend
-    console.log({
+    
+    // Create new project object
+    const newProject: Project = {
+      id: Date.now().toString(), // Generate a unique ID
       title,
       description,
       category,
       techStack,
-      link,
-      image,
-      imageFile
-    });
+      likes: 0,
+      views: 0,
+      image: image || 'https://images.unsplash.com/photo-1608306448197-e83633f1261c?q=80&w=2072&auto=format&fit=crop',
+    };
     
-    // For demo purposes, let's just close the form
-    onClose();
+    if (link) {
+      newProject.link = link;
+    }
+    
+    // Close form and pass the new project back
+    onClose(newProject);
   };
   
   return (
@@ -118,7 +128,7 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Create New Project</h1>
         <button
-          onClick={onClose}
+          onClick={() => onClose()}
           className="p-2 hover:bg-secondary rounded-full transition-colors"
         >
           <X size={20} />
@@ -275,7 +285,7 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
         <div className="flex justify-end space-x-4 pt-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onClose()}
             className="px-4 py-2 border border-input rounded-md hover:bg-secondary transition-colors"
           >
             Cancel

@@ -71,14 +71,23 @@ const mockProjects: Project[] = [
   },
 ];
 
-const Dashboard = ({ onNewProject }: { onNewProject: () => void }) => {
+interface DashboardProps {
+  onNewProject: () => void;
+  onProjectClick: (project: Project) => void;
+  userProjects: Project[];
+}
+
+const Dashboard = ({ onNewProject, onProjectClick, userProjects }: DashboardProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTechStack, setSelectedTechStack] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState('latest');
   
+  // Combine mock projects with user created projects
+  const allProjects = [...userProjects, ...mockProjects];
+  
   // Filter projects based on search, category, and tech stack
-  const filteredProjects = mockProjects.filter(project => {
+  const filteredProjects = allProjects.filter(project => {
     const matchesSearch = !searchTerm || 
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -132,7 +141,7 @@ const Dashboard = ({ onNewProject }: { onNewProject: () => void }) => {
             <ProjectCard 
               key={project.id} 
               project={project} 
-              onClick={() => console.log('Project clicked:', project.id)}
+              onClick={() => onProjectClick(project)}
             />
           ))}
         </div>

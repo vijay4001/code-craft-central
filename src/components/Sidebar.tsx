@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Home, FolderKanban, PlusSquare, Settings, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, FolderKanban, PlusSquare, Settings, Users, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ThemeToggle from './ThemeToggle';
 import { getUserData } from '@/pages/SettingsPage';
@@ -43,11 +43,22 @@ const Sidebar = ({
   onPageChange: (page: string) => void 
 }) => {
   const [expanded, setExpanded] = useState(true);
-  const userData = getUserData();
+  const [userData, setUserData] = useState(getUserData());
+  
+  // Update userData when settings are changed
+  useEffect(() => {
+    const updateUserData = () => {
+      setUserData(getUserData());
+    };
+    
+    // Check for user data changes every time the sidebar component renders
+    updateUserData();
+  }, []);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'projects', label: 'Projects', icon: FolderKanban },
+    { id: 'combined', label: 'Combined Projects', icon: Users },
     { id: 'newProject', label: 'New Project', icon: PlusSquare },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
