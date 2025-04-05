@@ -43,7 +43,6 @@ interface TeamProject {
   progress: number;
 }
 
-// Mock data for team projects
 const mockTeamProjects: TeamProject[] = [
   {
     id: '1',
@@ -125,6 +124,9 @@ const CombinedProjects = () => {
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [newTaskAssignee, setNewTaskAssignee] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [isAddingProject, setIsAddingProject] = useState(false);
+  const [newProjectTitle, setNewProjectTitle] = useState('');
+  const [newProjectDescription, setNewProjectDescription] = useState('');
   const { toast } = useToast();
 
   const handleProjectSelect = (project: TeamProject) => {
@@ -148,7 +150,6 @@ const CombinedProjects = () => {
           return task;
         });
         
-        // Calculate new progress
         const completedTasks = updatedTasks.filter(t => t.status === 'completed').length;
         const totalTasks = updatedTasks.length;
         const newProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -164,7 +165,6 @@ const CombinedProjects = () => {
     
     setProjects(updatedProjects);
     
-    // Update the selected project
     const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
     if (updatedProject) {
       setSelectedProject(updatedProject);
@@ -188,7 +188,7 @@ const CombinedProjects = () => {
     
     const newComment: Comment = {
       id: Date.now().toString(),
-      author: '1', // Current user ID (would be dynamic in a real app)
+      author: '1',
       text: commentText,
       timestamp: new Date().toISOString()
     };
@@ -211,7 +211,6 @@ const CombinedProjects = () => {
     
     setProjects(updatedProjects);
     
-    // Update the selected project and task
     const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
     if (updatedProject) {
       setSelectedProject(updatedProject);
@@ -244,7 +243,6 @@ const CombinedProjects = () => {
       if (project.id === selectedProject.id) {
         const updatedTasks = [...project.tasks, newTask];
         
-        // Recalculate progress
         const completedTasks = updatedTasks.filter(t => t.status === 'completed').length;
         const totalTasks = updatedTasks.length;
         const newProgress = Math.round((completedTasks / totalTasks) * 100);
@@ -260,13 +258,11 @@ const CombinedProjects = () => {
     
     setProjects(updatedProjects);
     
-    // Update the selected project
     const updatedProject = updatedProjects.find(p => p.id === selectedProject.id);
     if (updatedProject) {
       setSelectedProject(updatedProject);
     }
     
-    // Reset form
     setNewTaskTitle('');
     setNewTaskDescription('');
     setNewTaskDueDate('');
@@ -282,7 +278,7 @@ const CombinedProjects = () => {
   };
   
   const handleDeleteProject = (projectId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent project selection
+    event.stopPropagation();
     
     const updatedProjects = projects.filter(project => project.id !== projectId);
     setProjects(updatedProjects);
@@ -300,71 +296,160 @@ const CombinedProjects = () => {
     });
   };
 
+  const handleAddProject = () => {
+    if (!newProjectTitle || !newProjectDescription) return;
+    
+    const newProject: TeamProject = {
+      id: Date.now().toString(),
+      title: newProjectTitle,
+      description: newProjectDescription,
+      image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=2070&auto=format&fit=crop',
+      members: [
+        { id: '1', name: 'Alex Johnson', avatar: 'A', role: 'Project Lead' },
+      ],
+      tasks: [],
+      progress: 0
+    };
+    
+    setProjects([newProject, ...projects]);
+    setNewProjectTitle('');
+    setNewProjectDescription('');
+    setIsAddingProject(false);
+    
+    toast({
+      title: "Project Added",
+      description: "New team project has been created",
+      className: "border-green-500 border-2 bg-green-50 dark:bg-green-950/30 shadow-lg shadow-green-500/20",
+      duration: 3000,
+    });
+  };
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-1">Combined Projects</h1>
-        <p className="text-muted-foreground">Collaborate with team members on shared projects</p>
+      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Combined Projects</h1>
+          <p className="text-muted-foreground">Collaborate with team members on shared projects</p>
+        </div>
+        <Dialog open={isAddingProject} onOpenChange={setIsAddingProject}>
+          <DialogTrigger asChild>
+            <Button className="mt-4 sm:mt-0 bg-codepurple hover:bg-codepurple-dark">
+              <Plus size={18} className="mr-1" /> Add Team Project
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Team Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-title">Project Title</Label>
+                <Input 
+                  id="project-title" 
+                  value={newProjectTitle} 
+                  onChange={(e) => setNewProjectTitle(e.target.value)} 
+                  placeholder="Enter project title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-description">Description</Label>
+                <Textarea 
+                  id="project-description" 
+                  value={newProjectDescription} 
+                  onChange={(e) => setNewProjectDescription(e.target.value)} 
+                  placeholder="Enter project description"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddingProject(false)}>Cancel</Button>
+              <Button 
+                onClick={handleAddProject}
+                disabled={!newProjectTitle || !newProjectDescription}
+              >
+                Create Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Project List */}
         <div className="lg:col-span-1">
-          <h2 className="text-xl font-semibold mb-4">Team Projects</h2>
-          {projects.map(project => (
-            <Card 
-              key={project.id} 
-              className={`mb-4 cursor-pointer transition-all hover:shadow-md ${selectedProject?.id === project.id ? 'ring-2 ring-codepurple' : ''}`}
-              onClick={() => handleProjectSelect(project)}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Team Projects</h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsAddingProject(true)}
+              className="h-8"
             >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="relative h-32 -mx-6 -mt-6 mb-2 overflow-hidden rounded-t-lg">
-                    <img 
-                      src={project.image} 
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <Button 
-                    variant="destructive" 
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-80 hover:opacity-100"
-                    onClick={(e) => handleDeleteProject(project.id, e)}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                </div>
-                <CardTitle>{project.title}</CardTitle>
-                <CardDescription>{project.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center mb-2">
-                  <div className="w-full bg-secondary h-2 rounded-full">
-                    <div 
-                      className="bg-codepurple h-2 rounded-full" 
-                      style={{ width: `${project.progress}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-sm">{project.progress}%</span>
-                </div>
-                <div className="flex -space-x-2 overflow-hidden mt-3">
-                  {project.members.map(member => (
-                    <div 
-                      key={member.id}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-codeblue text-white font-medium"
-                      title={member.name}
-                    >
-                      {member.avatar}
+              <Plus size={16} className="mr-1" /> Add
+            </Button>
+          </div>
+          
+          {projects.length > 0 ? (
+            projects.map(project => (
+              <Card 
+                key={project.id} 
+                className={`mb-4 cursor-pointer transition-all hover:shadow-md ${selectedProject?.id === project.id ? 'ring-2 ring-codepurple' : ''}`}
+                onClick={() => handleProjectSelect(project)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="relative h-32 -mx-6 -mt-6 mb-2 overflow-hidden rounded-t-lg">
+                      <img 
+                        src={project.image} 
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
+                    <Button 
+                      variant="destructive" 
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-80 hover:opacity-100"
+                      onClick={(e) => handleDeleteProject(project.id, e)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                  <CardTitle>{project.title}</CardTitle>
+                  <CardDescription>{project.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center mb-2">
+                    <div className="w-full bg-secondary h-2 rounded-full">
+                      <div 
+                        className="bg-codepurple h-2 rounded-full" 
+                        style={{ width: `${project.progress}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 text-sm">{project.progress}%</span>
+                  </div>
+                  <div className="flex -space-x-2 overflow-hidden mt-3">
+                    {project.members.map(member => (
+                      <div 
+                        key={member.id}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-codeblue text-white font-medium"
+                        title={member.name}
+                      >
+                        {member.avatar}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground mb-4">No team projects yet</p>
+              <Button onClick={() => setIsAddingProject(true)}>
+                <Plus size={16} className="mr-1" /> Create Your First Project
+              </Button>
             </Card>
-          ))}
+          )}
         </div>
         
-        {/* Project Details */}
         <div className="lg:col-span-2">
           {selectedProject ? (
             <Tabs defaultValue="tasks">
