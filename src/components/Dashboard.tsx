@@ -75,9 +75,10 @@ interface DashboardProps {
   onNewProject: () => void;
   onProjectClick: (project: Project) => void;
   userProjects: Project[];
+  onDeleteProject: (projectId: string) => void; // Add this prop to fix the error
 }
 
-const Dashboard = ({ onNewProject, onProjectClick, userProjects }: DashboardProps) => {
+const Dashboard = ({ onNewProject, onProjectClick, userProjects, onDeleteProject }: DashboardProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTechStack, setSelectedTechStack] = useState<string | null>(null);
