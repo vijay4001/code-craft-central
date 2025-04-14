@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
@@ -7,6 +8,7 @@ import ProjectDetails from '@/components/ProjectDetails';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Project } from '@/components/ProjectCard';
+import ProjectsList from '@/components/ProjectsList';
 
 const Index = () => {
   const [activePage, setActivePage] = useState('dashboard');
@@ -142,12 +144,11 @@ const renderContent = (
         onPageChange={onPageChange}
       />;
     case 'projects':
-      return <Dashboard 
+      return <ProjectsList
         onNewProject={onNewProject} 
         onProjectClick={onProjectClick} 
         userProjects={userProjects} 
         onDeleteProject={onDeleteProject}
-        onPageChange={onPageChange}
       />;
     case 'combined':
       return <CombinedProjects />;
