@@ -9,10 +9,14 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-2 rounded-full hover:bg-secondary transition-colors"
+      className="p-2 rounded-full hover:bg-secondary transition-colors duration-300 animate-scale-in"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      {theme === 'dark' ? (
+        <Sun size={20} className="text-yellow-300" />
+      ) : (
+        <Moon size={20} />
+      )}
     </button>
   );
 };

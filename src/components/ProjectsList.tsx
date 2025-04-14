@@ -101,7 +101,7 @@ const ProjectsList = ({
   });
   
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">Projects</h1>
@@ -109,7 +109,7 @@ const ProjectsList = ({
         </div>
         <button 
           onClick={onNewProject}
-          className="flex items-center gap-2 mt-4 sm:mt-0 px-4 py-2 bg-codepurple hover:bg-codepurple-dark text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 mt-4 sm:mt-0 px-4 py-2 bg-codepurple hover:bg-codepurple-dark text-white rounded-lg transition-colors duration-300"
         >
           <PlusSquare size={18} />
           <span>New Project</span>
