@@ -5,14 +5,16 @@ import { useTheme } from './ThemeProvider';
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="p-2 rounded-full hover:bg-secondary transition-colors duration-300 animate-scale-in"
-      aria-label="Toggle theme"
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+      title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
     >
-      {theme === 'dark' ? (
+      {isDark ? (
         <Sun size={20} className="text-yellow-300" />
       ) : (
         <Moon size={20} />

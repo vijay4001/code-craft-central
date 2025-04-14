@@ -10,8 +10,15 @@ import SettingsPage from "./pages/SettingsPage";
 import MobileBlocker from "./components/MobileBlocker";
 import { useIsMobile } from "./hooks/use-mobile";
 
-// Create a client for React Query
-const queryClient = new QueryClient();
+// Create a client for React Query with better error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const AppContent = () => {
   const isMobile = useIsMobile();

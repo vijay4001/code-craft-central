@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ProjectCard, { Project } from './ProjectCard';
-import ProjectFilters from './ProjectFilters';
 import { PlusSquare, Workflow, Clock, TrendingUp, Star, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { 
   BarChart, 
   Bar, 
@@ -194,8 +192,8 @@ const Dashboard = ({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" style={{ fontSize: '12px' }} />
+                <YAxis style={{ fontSize: '12px' }} />
                 <Tooltip />
                 <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
               </BarChart>
