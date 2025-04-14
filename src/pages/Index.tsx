@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
@@ -18,21 +17,17 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // When returning from settings, ensure proper page display
   useEffect(() => {
-    // Reset to dashboard if coming from another route
     if (location.state?.returnTo) {
       setActivePage(location.state.returnTo);
     }
     
-    // Load saved projects from localStorage
     const savedProjects = localStorage.getItem('projects');
     if (savedProjects) {
       setProjects(JSON.parse(savedProjects));
     }
   }, [location]);
   
-  // Save projects to localStorage whenever they change
   useEffect(() => {
     if (projects.length > 0) {
       localStorage.setItem('projects', JSON.stringify(projects));
@@ -48,7 +43,6 @@ const Index = () => {
     setShowNewProjectForm(false);
     
     if (newProject) {
-      // Add the new project to the list
       const updatedProjects = [newProject, ...projects];
       setProjects(updatedProjects);
       
@@ -81,11 +75,9 @@ const Index = () => {
   };
   
   const handleDeleteProject = (projectId: string) => {
-    // Remove the project from the list
     const updatedProjects = projects.filter(project => project.id !== projectId);
     setProjects(updatedProjects);
     
-    // If the deleted project was selected, clear the selection
     if (selectedProject?.id === projectId) {
       setSelectedProject(null);
       setActivePage('dashboard');
@@ -103,12 +95,11 @@ const Index = () => {
     if (page === 'newProject') {
       handleNewProject();
     } else if (page === 'settings') {
-      // Store current page before navigating to settings
       navigate('/settings', { state: { returnTo: activePage } });
     } else {
       setActivePage(page);
-      setShowNewProjectForm(false); // Close form if open
-      setSelectedProject(null); // Clear selected project when changing pages
+      setShowNewProjectForm(false);
+      setSelectedProject(null);
     }
   };
 
@@ -126,7 +117,7 @@ const Index = () => {
             onDelete={handleDeleteProject}
           />
         ) : (
-          renderContent(activePage, handleNewProject, handleProjectClick, projects, handleDeleteProject)
+          renderContent(activePage, handleNewProject, handleProjectClick, projects, handleDeleteProject, handlePageChange)
         )}
       </div>
     </div>
@@ -138,7 +129,8 @@ const renderContent = (
   onNewProject: () => void, 
   onProjectClick: (project: Project) => void,
   userProjects: Project[],
-  onDeleteProject: (projectId: string) => void
+  onDeleteProject: (projectId: string) => void,
+  onPageChange: (page: string) => void
 ) => {
   switch (page) {
     case 'dashboard':
@@ -147,6 +139,7 @@ const renderContent = (
         onProjectClick={onProjectClick} 
         userProjects={userProjects} 
         onDeleteProject={onDeleteProject}
+        onPageChange={onPageChange}
       />;
     case 'projects':
       return <Dashboard 
@@ -154,6 +147,7 @@ const renderContent = (
         onProjectClick={onProjectClick} 
         userProjects={userProjects} 
         onDeleteProject={onDeleteProject}
+        onPageChange={onPageChange}
       />;
     case 'combined':
       return <CombinedProjects />;
@@ -163,6 +157,7 @@ const renderContent = (
         onProjectClick={onProjectClick} 
         userProjects={userProjects} 
         onDeleteProject={onDeleteProject}
+        onPageChange={onPageChange}
       />;
   }
 };
